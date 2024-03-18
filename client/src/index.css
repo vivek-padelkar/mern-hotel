@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.pageNotFoundContainer {
+  background-image: url('images/test.jpg');
+  height: 100vh;
+  width: 100vw;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  background-repeat: no-repeat;
+}
+
+.mpageNotFoundContainer-message-container {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
