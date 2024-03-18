@@ -5,10 +5,12 @@ import SignUp from './pages/SignUp.page'
 import About from './pages/About.page'
 import Profile from './pages/Profile.page'
 import PageNotFound from './pages/PageNotFound.page'
+import Header from './components/Header.component'
 
 function App() {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
         <Route path="*" element={<PageNotFound />} />
         <Route path="/" element={<Home />} />
