@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 import { generateToken } from '../utils/generateToken.js'
 
 export const signUp = asyncHandler(async (req, res) => {
-  signUpValidator(req.body)
+  await signUpValidator(req.body)
   const { username, password, email } = req.body
   const userExists = await User.findOne({ email: email })
   if (userExists) {
@@ -25,10 +25,4 @@ export const signUp = asyncHandler(async (req, res) => {
     res.status(400)
     throw new Error('Invalid user data')
   }
-
-  const newUser = new User({ username, password, email })
-  await newUser.save()
-  res.json({
-    message: 'User Created successfully!',
-  })
 })
