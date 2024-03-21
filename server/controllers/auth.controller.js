@@ -22,7 +22,6 @@ export const signUp = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id),
     })
   } else {
     res.status(400)
@@ -45,6 +44,5 @@ export const signIn = asyncHandler(async (req, res) => {
       _id: userData._id,
       name: userData.name,
       email: userData.email,
-      token: generateToken(userData._id),
     })
 })

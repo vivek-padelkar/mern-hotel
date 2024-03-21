@@ -1,15 +1,17 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import axiosInstance from '../utils/axiosConfig'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { signInStart, signInSucess, signInError } from '../redux/user/userSlice'
 
 const SignIn = () => {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+  const { loading } = useSelector((state) => state.user)
   const [formData, setFormData] = useState({})
   const [password, setPassword] = useState('')
-  const refPassword = useRef()
+  const dispatch = useDispatch()
 
   const handleChange = (e) => {
     if (e.target.id === 'password') setPassword(e.target.value)
@@ -23,7 +25,7 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault()
-      setLoading(true)
+      dispatch(signInStart())
       const AXIOS_HEADER = {
         headers: {
           'Content-Type': 'application/json',
@@ -34,11 +36,11 @@ const SignIn = () => {
         formData,
         AXIOS_HEADER
       )
-      setLoading(false)
+      dispatch(signInSucess(data))
       toast.success('Logged in successfully! ')
       navigate('/')
     } catch (error) {
-      setLoading(false)
+      dispatch(signInError())
       toast.error(error?.response?.data?.message || error)
     }
   }
