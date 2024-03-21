@@ -1,4 +1,4 @@
-import Joi from 'joi'
+import Joi from '@hapi/Joi'
 import { validateSchema } from './validation.js'
 
 export function signUpValidator(reqbody) {
@@ -6,7 +6,18 @@ export function signUpValidator(reqbody) {
     const schema = Joi.object({
       username: Joi.string().required(),
       password: Joi.string().required(),
-      email: Joi.string().required(),
+      email: Joi.string().email().required(),
+    })
+    validateSchema(reqbody, schema)
+  } catch (error) {
+    throw error
+  }
+}
+export function signInValidator(reqbody) {
+  try {
+    const schema = Joi.object({
+      password: Joi.string().required(),
+      email: Joi.string().email().required(),
     })
     validateSchema(reqbody, schema)
   } catch (error) {

@@ -3,8 +3,11 @@ import PasswordCheckList from '../components/PasswordCheckList.component'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import axiosInstance from '../utils/axiosConfig'
+import { useNavigate } from 'react-router-dom'
 
 const SignUp = () => {
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({})
   const [password, setPassword] = useState('')
   const [retypePassword, setRetypePassword] = useState('')
@@ -23,6 +26,7 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault()
+      setLoading(true)
       if (!isValidPassword) {
         toast.error('Please check the password!')
         refPassword.current.focus()
@@ -33,17 +37,18 @@ const SignUp = () => {
           'Content-Type': 'application/json',
         },
       }
-
+      delete formData.retypePassword
       const { data } = await axiosInstance.post(
         '/auth/sign-up',
         formData,
         AXIOS_HEADER
       )
-      console.log(data)
+      setLoading(false)
       toast.success('User register successfully! ')
+      navigate('/sign-in')
     } catch (error) {
-      console.log('error')
-      console.log(error)
+      setLoading(false)
+      toast.error(error?.response?.data?.message || error)
     }
   }
 
@@ -103,8 +108,9 @@ const SignUp = () => {
         <button
           className="bg-slate-700 text-white p-3 
         rounded-lg hover:opacity-95 disabled:opacity-80"
+          disabled={loading}
         >
-          Sign up
+          {loading ? `Loading...` : `Sign up`}
         </button>
       </form>
 

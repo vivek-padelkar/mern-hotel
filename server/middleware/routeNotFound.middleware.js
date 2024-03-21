@@ -5,8 +5,9 @@ export const routeNotFound = (req, res, next) => {
 }
 
 export const errorHandler = (err, req, res, next) => {
-  res.status(res.statusCode || 500)
-  res.json({
+  let statusCode = res.statusCode === 200 ? 500 : res.statusCode
+  res.status(statusCode)
+  res.send({
     message: err.message || err,
     stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
   })
