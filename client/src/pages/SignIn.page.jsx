@@ -5,6 +5,7 @@ import axiosInstance from '../utils/axiosConfig'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { signInStart, signInSucess, signInError } from '../redux/user/userSlice'
+import Oauth from '../components/Oauth.component.'
 
 const SignIn = () => {
   const navigate = useNavigate()
@@ -15,7 +16,6 @@ const SignIn = () => {
 
   const handleChange = (e) => {
     if (e.target.id === 'password') setPassword(e.target.value)
-    if (e.target.id === 'retypePassword') setRetypePassword(e.target.value)
     setFormData({
       ...formData,
       [e.target.id]: e.target.value,
@@ -44,6 +44,7 @@ const SignIn = () => {
       toast.error(error?.response?.data?.message || error)
     }
   }
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl text-center font-semibold my-7">Sign in</h1>
@@ -70,12 +71,13 @@ const SignIn = () => {
         />
 
         <button
-          className="bg-slate-700 text-white p-3 
+          className="uppercase bg-slate-700 text-white p-3 
         rounded-lg hover:opacity-95 disabled:opacity-80"
           disabled={loading}
         >
           {loading ? `Loading...` : `Sign in`}
         </button>
+        <Oauth />
       </form>
 
       <div className="my-2">
