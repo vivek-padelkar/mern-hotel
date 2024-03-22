@@ -97,7 +97,6 @@ const SignUp = () => {
         />
 
         <div>
-          <p className="">Password checks:</p>
           <PasswordCheckList
             password={password}
             retypePassword={retypePassword}

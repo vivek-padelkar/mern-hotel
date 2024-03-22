@@ -6,6 +6,7 @@ import About from './pages/About.page'
 import Profile from './pages/Profile.page'
 import PageNotFound from './pages/PageNotFound.page'
 import Header from './components/Header.component'
+import PrivateRoute from './components/PrivateRoute'
 import 'react-toastify/dist/ReactToastify.css'
 import { ToastContainer } from 'react-toastify'
 function App() {
@@ -28,7 +29,9 @@ function App() {
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/about" element={<About />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/profile" element={<Profile />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
