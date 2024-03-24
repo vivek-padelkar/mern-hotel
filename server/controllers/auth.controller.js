@@ -76,3 +76,8 @@ export const signInByGoogle = asyncHandler(async (req, res) => {
       .cookie('access-token', generateToken(token), { httpOnly: true })
       .json(response)
 })
+
+export const signOut = asyncHandler(async (req, res) => {
+  res.clearCookie('access-token')
+  res.json('User logout successfully !')
+})

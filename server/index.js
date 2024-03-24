@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { connectDb } from './db/dbConfig.js'
 import userRoute from './routes/user.routes.js'
 import authRoute from './routes/auth.routes.js'
@@ -24,6 +25,8 @@ app.use(
 )
 
 app.use(express.json())
+app.use(cookieParser())
+
 app.use(`${BASE_PATH}/user`, userRoute)
 app.use(`${BASE_PATH}/auth`, authRoute)
 

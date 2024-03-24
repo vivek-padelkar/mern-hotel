@@ -8,7 +8,9 @@ import PageNotFound from './pages/PageNotFound.page'
 import Header from './components/Header.component'
 import PrivateRoute from './components/PrivateRoute'
 import 'react-toastify/dist/ReactToastify.css'
+import 'reactjs-popup/dist/index.css'
 import { ToastContainer } from 'react-toastify'
+
 function App() {
   return (
     <BrowserRouter>

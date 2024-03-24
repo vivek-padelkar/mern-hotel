@@ -1,4 +1,5 @@
-import { useSelector } from 'react-redux'
+import { useEffect, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   getDownloadURL,
   getStorage,
@@ -8,36 +9,47 @@ import {
 import { toast } from 'react-toastify'
 import { app } from '../fireBase'
 import PasswordCheckList from '../components/PasswordCheckList.component'
-import { useEffect, useRef, useState } from 'react'
+import {
+  updateUserSuccess,
+  updateUserFailure,
+  updateUserStart,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signOutStart,
+  signOutFailure,
+  signOutSuccess,
+} from '../redux/user/userSlice'
+import axiosInstance from '../utils/axiosConfig'
+import PopUp from '../components/PopUp.component'
 
 const Profile = () => {
   const fileRef = useRef()
-  const { currentUser } = useSelector((state) => state.user)
+  const refPassword = useRef()
+  const dispatch = useDispatch()
+  const { currentUser, loading } = useSelector((state) => state.user)
   const [password, setPassword] = useState('')
   const [retypePassword, setRetypePassword] = useState('')
   const [isValidPassword, setIsValidPassword] = useState(false)
   const [file, setFile] = useState(undefined)
   const [filePercentage, setFilePercentage] = useState(0)
   const [formData, setFormData] = useState({})
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     if (file) {
-      console.log('useeffect ran')
       handleFileUpload(file)
     }
   }, [file])
 
-  console.log('i am working with' + JSON.stringify(formData))
   async function handleFileUpload(file) {
     try {
-      console.log('inside file uploading')
       const storage = getStorage(app)
       const filename = new Date().getTime() + file.name
       const storegeRef = ref(storage, filename)
       const uploadTask = uploadBytesResumable(storegeRef, file)
       uploadTask.on('state_changed', (snapshot) => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        console.log(progress)
         setFilePercentage(Math.round(progress))
       })
       await uploadTask
@@ -49,7 +61,6 @@ const Profile = () => {
         avatar: downloadURL,
       })
     } catch (error) {
-      console.log(error)
       toast.error('Somthing went wrong, image must be < 2mb !' + error.message)
     }
   }
@@ -66,8 +77,8 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault()
-      setLoading(true)
-      if (!isValidPassword) {
+      dispatch(updateUserStart())
+      if (formData.password && !isValidPassword) {
         toast.error('Please check the password!')
         refPassword.current.focus()
         return
@@ -79,27 +90,65 @@ const Profile = () => {
       }
       delete formData.retypePassword
       const { data } = await axiosInstance.post(
-        '/auth/sign-up',
+        `/user/update/${currentUser._id}`,
         formData,
         AXIOS_HEADER
       )
-      setLoading(false)
-      toast.success('User register successfully! ')
-      navigate('/sign-in')
+      dispatch(updateUserSuccess(data))
+      toast.success('User updated successfully! ')
     } catch (error) {
-      setLoading(false)
+      dispatch(updateUserFailure())
       toast.error(error?.response?.data?.message || error)
     }
   }
 
-  return (
-    <div className="p-3 max-w-lg mx-auto">
-      {/* <img src={LoadingGif} /> */}
+  const handleYes = async (e) => {
+    try {
+      setIsModalOpen(false)
+      e.preventDefault()
+      dispatch(deleteUserStart())
+      const AXIOS_HEADER = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+      delete formData.retypePassword
+      const { data } = await axiosInstance.delete(
+        `/user/delete/${currentUser._id}`,
+        formData,
+        AXIOS_HEADER
+      )
+      dispatch(deleteUserSuccess(data))
+    } catch (error) {
+      dispatch(deleteUserFailure())
+      toast.error(error?.response?.data?.message || error)
+    }
+  }
 
+  const handleNo = () => {
+    // Handle no action
+    setIsModalOpen(false)
+  }
+
+  const handleLogOut = async () => {
+    try {
+      console.log('i am logoout')
+      dispatch(signOutStart())
+      const { data } = await axiosInstance.post(`/auth/sign-out`)
+      dispatch(signOutSuccess())
+    } catch (error) {
+      dispatch(signOutFailure())
+      toast.error(error?.response?.data?.message || error)
+    }
+  }
+  return (
+    <div className="p-3 max-w-lg mx-auto relative">
+      <PopUp />
       <h1 className="font-semibold text-center text-3xl mx-auto my-7">
         Profile
       </h1>
-      <form className="flex flex-col gap-3">
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           hidden
           type="file"
@@ -123,31 +172,36 @@ const Profile = () => {
           type="text"
           required
           placeholder="username"
+          defaultValue={currentUser.username}
           onChange={handleChange}
         />
+
         <input
           className="p-3 border rounded-lg"
           id="email"
           type="email"
           required
           placeholder="email"
+          defaultValue={currentUser.email}
           onChange={handleChange}
         />
+
         <input
           className="p-3 border rounded-lg"
           id="password"
           type="password"
-          placeholder="username"
+          placeholder="password "
           onChange={handleChange}
         />
+
         <input
           className="p-3 border rounded-lg"
-          id="retypepassword"
+          id="retypePassword"
           type="password"
-          required
           placeholder="retype-password"
           onChange={handleChange}
         />
+
         <PasswordCheckList
           password={password}
           retypePassword={retypePassword}
@@ -157,13 +211,27 @@ const Profile = () => {
           className="bg-slate-700 text-white p-3 
         rounded-lg hover:opacity-95 disabled:opacity-80
         uppercase"
+          disabled={loading}
         >
-          Update
+          {loading ? 'Loading...' : 'Update'}
         </button>
       </form>
       <div className="flex justify-between mt-4">
-        <span className="text-red-700 cursor-pointer">Delete account</span>
-        <span className="text-red-700 cursor-pointer">Sign out</span>
+        <span
+          className="text-red-700 cursor-pointer"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Delete Account?
+        </span>
+        <PopUp
+          isOpen={isModalOpen}
+          message="Do you really want to delete your account?"
+          onYes={handleYes}
+          onNo={handleNo}
+        />
+        <span className="text-red-700 cursor-pointer" onClick={handleLogOut}>
+          Sign out
+        </span>
       </div>
     </div>
   )
