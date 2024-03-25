@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser'
 import { connectDb } from './db/dbConfig.js'
 import userRoute from './routes/user.routes.js'
 import authRoute from './routes/auth.routes.js'
+import listingRoute from './routes/listing.routes.js'
+
 import {
   errorHandler,
   routeNotFound,
@@ -27,8 +29,9 @@ app.use(
 app.use(express.json())
 app.use(cookieParser())
 
-app.use(`${BASE_PATH}/user`, userRoute)
 app.use(`${BASE_PATH}/auth`, authRoute)
+app.use(`${BASE_PATH}/user`, userRoute)
+app.use(`${BASE_PATH}/listing`, listingRoute)
 
 app.use(routeNotFound)
 app.use(errorHandler)
