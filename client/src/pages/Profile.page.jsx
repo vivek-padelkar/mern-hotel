@@ -22,6 +22,7 @@ import {
 } from '../redux/user/userSlice'
 import axiosInstance from '../utils/axiosConfig'
 import PopUp from '../components/PopUp.component'
+import { Link } from 'react-router-dom'
 
 const Profile = () => {
   const fileRef = useRef()
@@ -216,6 +217,14 @@ const Profile = () => {
           {loading ? 'Loading...' : 'Update'}
         </button>
       </form>
+
+      <button
+        className="mt-2 bg-green-700 text-white p-3
+      rounded-lg uppercase text-center hover:opacity-95 w-full  "
+      >
+        <Link to="/create-listing">Create Listing</Link>
+      </button>
+
       <div className="flex justify-between mt-4">
         <span
           className="text-red-700 cursor-pointer"
