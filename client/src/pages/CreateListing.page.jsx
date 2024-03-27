@@ -1,19 +1,36 @@
+import { useState } from 'react'
+import { toast } from 'react-toastify'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import {
   getDownloadURL,
   getStorage,
   ref,
   uploadBytesResumable,
 } from 'firebase/storage'
-import { useState } from 'react'
-import { toast } from 'react-toastify'
 import { app } from '../fireBase'
+import axiosInstance from '../utils/axiosConfig'
 
 const CreateListing = () => {
   const [files, setFiles] = useState([])
   const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    address: '',
+    type: 'rent',
+    bedrooms: 1,
+    bathrooms: 1,
+    regularPrice: 0,
+    discountedPrice: 0,
     imageUrls: [],
+    offer: false,
+    parking: false,
+    furnished: false,
   })
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const { currentUser } = useSelector((state) => state.user)
 
   function handleImageSubmit() {
     try {
@@ -66,13 +83,68 @@ const CreateListing = () => {
     })
   }
 
-  console.log('uploading' + uploading)
+  const handleChange = (e) => {
+    if (e.target.id === 'sale' || e.target.id === 'rent') {
+      setFormData({
+        ...formData,
+        type: e.target.id,
+      })
+    }
+    if (
+      e.target.id === 'parking' ||
+      e.target.id === 'furnished' ||
+      e.target.id === 'offer'
+    ) {
+      setFormData({
+        ...formData,
+        [e.target.id]: e.target.checked,
+      })
+    }
+    if (
+      e.target.type === 'number' ||
+      e.target.type === 'text' ||
+      e.target.type === 'textarea'
+    ) {
+      setFormData({ ...formData, [e.target.id]: e.target.value })
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault()
+      if (formData.imageUrls.length === 0)
+        throw Error('Please select atleast 1 image to upload !')
+      if (formData.discountedPrice > formData.regularPrice === 0)
+        throw Error('Dicounted Price cannot be greater than Regular price !')
+      setLoading(true)
+      const AXIOS_HEADER = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+      const { data } = await axiosInstance.post(
+        `/listing/create`,
+        { ...formData, userRef: currentUser._id },
+        AXIOS_HEADER
+      )
+
+      toast.success('Your Property posted successfully !')
+      setLoading(false)
+      navigate(`/listing/${data.listing._id}`)
+    } catch (error) {
+      toast.error(error.message || error)
+    }
+  }
+
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
         Create Listing
       </h1>
-      <form className="flex flex-col sm:flex-row gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col sm:flex-row md:flex-row gap-6"
+      >
         <div className="flex flex-col gap-4 flex-1">
           {/* name   */}
           <input
@@ -82,6 +154,8 @@ const CreateListing = () => {
             className="border p-3 rounded-lg"
             maxLength={62}
             minLength={10}
+            onChange={handleChange}
+            value={formData.name}
             required
           />
           {/* description */}
@@ -90,6 +164,8 @@ const CreateListing = () => {
             type="text"
             placeholder="Description"
             className="border p-3 rounded-lg"
+            onChange={handleChange}
+            value={formData.description}
             required
           />
           {/* address */}
@@ -98,6 +174,8 @@ const CreateListing = () => {
             type="text"
             placeholder="Address"
             className="border p-3 rounded-lg"
+            onChange={handleChange}
+            value={formData.address}
             required
           />
 
@@ -109,7 +187,13 @@ const CreateListing = () => {
               <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
                 {/* sale checkbox */}
                 <div className="flex items-center gap-1">
-                  <input type="checkbox" id="sale" className="w-5" />
+                  <input
+                    type="checkbox"
+                    id="sale"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.type === 'sale'}
+                  />
                   <img
                     className="w-6 h-"
                     src="https://img.icons8.com/wired/64/sale.png"
@@ -119,7 +203,13 @@ const CreateListing = () => {
                 </div>
                 {/* rent checkbox */}
                 <div className="flex items-center gap-1">
-                  <input type="checkbox" id="sale" className="w-5" />
+                  <input
+                    type="checkbox"
+                    id="rent"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.type === 'rent'}
+                  />
                   <img
                     className="w-6 h-6"
                     src="https://img.icons8.com/ios/50/sell-property--v1.png"
@@ -136,7 +226,13 @@ const CreateListing = () => {
               <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
                 {/* parking checkbox */}
                 <div className="flex items-center gap-1">
-                  <input type="checkbox" id="sale" className="w-5" />
+                  <input
+                    type="checkbox"
+                    id="parking"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.parking}
+                  />
                   <img
                     className="w-6 h-6"
                     src="https://img.icons8.com/ios/50/parking.png"
@@ -146,17 +242,29 @@ const CreateListing = () => {
                 </div>
                 {/* Fursnished checkbox */}
                 <div className="flex items-center gap-1">
-                  <input type="checkbox" id="sale" className="w-5" />
+                  <input
+                    type="checkbox"
+                    id="furnished"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.furnished}
+                  />
                   <img
                     className="w-6 h-6"
                     src="https://img.icons8.com/serif/32/experimental-armchair-serif.png"
-                    alt="Fursnished"
+                    alt="furnished"
                   />
                   <span>Fursnished</span>
                 </div>
                 {/* Offer checkbox */}
                 <div className="flex items-center gap-1">
-                  <input type="checkbox" id="sale" className="w-5" />
+                  <input
+                    type="checkbox"
+                    id="offer"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.offer}
+                  />
                   <img
                     className="w-6 h-6"
                     src="https://img.icons8.com/ios/50/discount--v1.png"
@@ -171,14 +279,16 @@ const CreateListing = () => {
             <div>
               <h1 className="mb-2 font-semibold">Specification:</h1>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {/* bed */}
+                {/* bedrooms */}
                 <div className="flex items-center gap-2">
                   <input
-                    className="border border-gray-300 rounded-lg"
+                    className="p-1 border border-gray-300 rounded-lg"
                     type="Number"
                     id="bedrooms"
                     min={1}
                     max={10}
+                    onChange={handleChange}
+                    value={formData.bedrooms}
                     required
                   />
                   <img
@@ -188,15 +298,17 @@ const CreateListing = () => {
                   />
                   <p>Beds</p>
                 </div>
-                {/* baths */}
+                {/* bathrooms */}
                 <div className="flex items-center gap-2">
                   <input
-                    className="border border-gray-300 rounded-lg"
+                    className="p-1 border border-gray-300 rounded-lg "
                     type="Number"
-                    id="bedrooms"
+                    id="bathrooms"
                     min={1}
                     max={10}
                     required
+                    onChange={handleChange}
+                    value={formData.bathrooms}
                   />
                   <img
                     className="w-6 h-6"
@@ -205,52 +317,69 @@ const CreateListing = () => {
                   />
                   <p>Bath's</p>
                 </div>
-                {/* Regular price */}
-                <div className="flex items-center gap-2">
-                  <input
-                    className="border border-gray-300 rounded-lg"
-                    type="Number"
-                    id="bedrooms"
-                    min={1}
-                    max={10}
-                    required
-                  />
-                  <img
-                    className="w-6 h-6"
-                    src="https://img.icons8.com/ios/50/price-tag--v1.png"
-                    alt="price-tag--v1"
-                  />
-                  <div className="flex flex-col">
-                    <p>Regular price</p>
-                    <p className="text-sm">(&#8377; per month)</p>
-                  </div>
-                </div>
-                {/* Discounted Price */}
-                <div className="flex items-center gap-2">
-                  <input
-                    className="border border-gray-300 rounded-lg"
-                    type="Number"
-                    id="bedrooms"
-                    min={1}
-                    max={10}
-                    required
-                  />
-                  <img
-                    className="w-6 h-6"
-                    src="https://img.icons8.com/ios/50/discount--v1.png"
-                    alt="Offer"
-                  />
-                  <div className="flex flex-col">
-                    <p>Discounted price</p>
-                    <p className="text-sm">(&#8377; per month)</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col flex-1 gap-4">
+          {/* Price Details */}
+          <div>
+            <h1 className="mb-2 font-semibold">Price:</h1>
+            <div className="flex flex-col">
+              {/* Regular price */}
+              <div className="">
+                <div className="flex gap-2">
+                  <img
+                    className="w-6 h-6"
+                    src="https://img.icons8.com/ios/50/price-tag--v1.png"
+                    alt="price-tag--v1"
+                  />
+                  <p>
+                    Regular price{' '}
+                    <span className="text-sm">(&#8377; per month)</span>
+                  </p>
+                </div>
+                <input
+                  className="p-1 border border-gray-300 rounded-lg w-36 mt-2"
+                  type="Number"
+                  id="regularPrice"
+                  min={1}
+                  onChange={handleChange}
+                  value={formData.regularPrice}
+                  required
+                />
+              </div>
+              {/* Discounted Price */}
+              {formData.offer && (
+                <div className="mt-4">
+                  <div className="flex gap-2">
+                    <img
+                      className="w-6 h-6"
+                      src="https://img.icons8.com/ios/50/discount--v1.png"
+                      alt="discounted price"
+                    />
+                    <p>
+                      Dicounted price{' '}
+                      <span className="text-sm">(&#8377; per month)</span>
+                    </p>
+                  </div>
+
+                  <input
+                    className="p-1 border border-gray-300 rounded-lg mt-2 w-36"
+                    type="Number"
+                    id="discountedPrice"
+                    min={1}
+                    required
+                    onChange={handleChange}
+                    value={formData.discountedPrice}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* image upload functionality */}
           <p className="font-semibold">Images:</p>
           <span className="font-normal text-gray-600 ml-2">
             The first image will be the cover (max 6)
@@ -273,6 +402,8 @@ const CreateListing = () => {
               {uploading ? 'Uploading...' : 'Upload'}
             </button>
           </div>
+
+          {/* delete image functionality */}
           {formData.imageUrls.length > 0 &&
             formData.imageUrls.map((imgPath, index) => (
               <div
@@ -307,7 +438,11 @@ const CreateListing = () => {
                 </button>
               </div>
             ))}
-          <button className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80">
+          {/* final form submit to create listing */}
+          <button
+            disabled={loading}
+            className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+          >
             Create listing
           </button>
         </div>
