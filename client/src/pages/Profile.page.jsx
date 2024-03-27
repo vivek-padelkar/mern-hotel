@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   getDownloadURL,
   getStorage,
+  list,
   ref,
   uploadBytesResumable,
 } from 'firebase/storage'
@@ -36,6 +37,7 @@ const Profile = () => {
   const [filePercentage, setFilePercentage] = useState(0)
   const [formData, setFormData] = useState({})
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [listing, setListing] = useState([])
 
   useEffect(() => {
     if (file) {
@@ -142,6 +144,18 @@ const Profile = () => {
       toast.error(error?.response?.data?.message || error)
     }
   }
+
+  const showListing = async () => {
+    try {
+      const { data } = await axiosInstance.get(
+        `/user/listings/${currentUser._id}`
+      )
+      setListing(data)
+    } catch (error) {
+      toast.error(error.message || message)
+    }
+  }
+
   return (
     <div className="p-3 max-w-lg mx-auto relative">
       <PopUp />
@@ -242,6 +256,82 @@ const Profile = () => {
           Sign out
         </span>
       </div>
+      <button
+        className="text-green-700 text-center w-full mt-2 hover:underline opacity-95"
+        onClick={showListing}
+      >
+        Show listing
+      </button>
+      {listing && listing.length > 0 && (
+        <div className="my-7">
+          <h1 className="text-center uppercase font-semibold mt-2">
+            Your Listings
+          </h1>
+          {listing.map((list) => (
+            <div className="p-2">
+              <div
+                key={list._id}
+                className="p-3 mt-2 mb-2 flex flex-col border rounded-lg 
+            sm:flex-row justify-between items-center"
+              >
+                <div className="flex flex-col justify-center items-center gap-2 sm:flex-row">
+                  <Link to={`/listing/${list._id}`}>
+                    <img
+                      className="w-full h-full object-contain rounded-lg sm:w-20 h-20"
+                      src={list.imageUrls[0]}
+                      alt={list.name}
+                    />
+                  </Link>
+                  <Link
+                    className="text-slate-700 hover:underline truncate "
+                    to={`/listing/${list._id}`}
+                  >
+                    <p>{list.name}</p>
+                  </Link>
+                </div>
+                <div className="flex flex-col">
+                  <button className="text-red-700 uppercase">Delete</button>
+                  <button className="text-green-700 uppercase">Edit</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* {listing.length > 0 &&
+        listing.map((list) => (
+          <>
+            <h2 className="text-center uppercase font-semibold">
+              your listings
+            </h2>
+            <div
+              key={list._id}
+              className="p-3 mt-2 mb-2 flex flex-col border rounded-lg 
+            sm:flex-row justify-between items-center"
+            >
+              <div className="flex flex-col justify-center items-center gap-2 sm:flex-row">
+                <Link to={`/listing/${list._id}`}>
+                  <img
+                    className="w-full h-full object-contain rounded-lg sm:w-20 h-20"
+                    src={list.imageUrls[0]}
+                    alt={list.name}
+                  />
+                </Link>
+                <Link
+                  className="text-slate-700 hover:underline truncate "
+                  to={`/listing/${list._id}`}
+                >
+                  <p>{list.name}</p>
+                </Link>
+              </div>
+              <div className="flex flex-col">
+                <button className="text-red-700 uppercase">Delete</button>
+                <button className="text-green-700 uppercase">Edit</button>
+              </div>
+            </div>
+          </>
+        ))} */}
     </div>
   )
 }
