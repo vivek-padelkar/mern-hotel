@@ -38,6 +38,9 @@ const Profile = () => {
   const [formData, setFormData] = useState({})
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [listing, setListing] = useState([])
+  const [isOpen, setIsOpen] = useState(false)
+  const [message, setMessage] = useState(false)
+  const [idToDelete, setIdToDelete] = useState('')
 
   useEffect(() => {
     if (file) {
@@ -145,7 +148,7 @@ const Profile = () => {
     }
   }
 
-  const showListing = async () => {
+  async function showListing() {
     try {
       const { data } = await axiosInstance.get(
         `/user/listings/${currentUser._id}`
@@ -156,13 +159,30 @@ const Profile = () => {
     }
   }
 
+  const onYes = async () => {
+    try {
+      setIsOpen(false)
+      if (!idToDelete) toast.error('Id not found to delete the listing')
+      const { data } = await axiosInstance.delete(
+        `/listing/delete/${idToDelete}`
+      )
+      toast.success(data.message)
+      setListing((prev) => prev.filter((listing) => listing._id !== idToDelete))
+      setIdToDelete('')
+    } catch (error) {
+      toast.error('Error while deleting the Listing')
+    }
+  }
+
+  const onNo = () => {
+    setIsOpen(false)
+  }
   return (
     <div className="p-3 max-w-lg mx-auto relative">
       <PopUp />
       <h1 className="font-semibold text-center text-3xl mx-auto my-7">
         Profile
       </h1>
-
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           hidden
@@ -231,14 +251,12 @@ const Profile = () => {
           {loading ? 'Loading...' : 'Update'}
         </button>
       </form>
-
       <button
         className="mt-2 bg-green-700 text-white p-3
       rounded-lg uppercase text-center hover:opacity-95 w-full  "
       >
         <Link to="/create-listing">Create Listing</Link>
       </button>
-
       <div className="flex justify-between mt-4">
         <span
           className="text-red-700 cursor-pointer"
@@ -256,6 +274,7 @@ const Profile = () => {
           Sign out
         </span>
       </div>
+      {/* SHOW LISTING */}
       <button
         className="text-green-700 text-center w-full mt-2 hover:underline opacity-95"
         onClick={showListing}
@@ -268,9 +287,8 @@ const Profile = () => {
             Your Listings
           </h1>
           {listing.map((list) => (
-            <div className="p-2">
+            <div className="p-2" key={list._id}>
               <div
-                key={list._id}
                 className="p-3 mt-2 mb-2 flex flex-col border rounded-lg 
             sm:flex-row justify-between items-center"
               >
@@ -283,55 +301,34 @@ const Profile = () => {
                     />
                   </Link>
                   <Link
-                    className="text-slate-700 hover:underline truncate "
+                    className="text-slate-700  font-semibold uppercase hover:underline truncate "
                     to={`/listing/${list._id}`}
                   >
                     <p>{list.name}</p>
                   </Link>
                 </div>
-                <div className="flex flex-col">
-                  <button className="text-red-700 uppercase">Delete</button>
-                  <button className="text-green-700 uppercase">Edit</button>
+                {/* delete or edit listing */}
+                <div className="flex sm: flex-row gap-7 mt-2">
+                  <button
+                    className="text-red-700 uppercase hover:underline"
+                    onClick={() => {
+                      setIsOpen(true)
+                      setMessage(`Do you really want to delete "${list.name}"?`)
+                      setIdToDelete(list._id)
+                    }}
+                  >
+                    Delete
+                  </button>
+                  <button className="text-green-700 uppercase hover:underline">
+                    Edit
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* {listing.length > 0 &&
-        listing.map((list) => (
-          <>
-            <h2 className="text-center uppercase font-semibold">
-              your listings
-            </h2>
-            <div
-              key={list._id}
-              className="p-3 mt-2 mb-2 flex flex-col border rounded-lg 
-            sm:flex-row justify-between items-center"
-            >
-              <div className="flex flex-col justify-center items-center gap-2 sm:flex-row">
-                <Link to={`/listing/${list._id}`}>
-                  <img
-                    className="w-full h-full object-contain rounded-lg sm:w-20 h-20"
-                    src={list.imageUrls[0]}
-                    alt={list.name}
-                  />
-                </Link>
-                <Link
-                  className="text-slate-700 hover:underline truncate "
-                  to={`/listing/${list._id}`}
-                >
-                  <p>{list.name}</p>
-                </Link>
-              </div>
-              <div className="flex flex-col">
-                <button className="text-red-700 uppercase">Delete</button>
-                <button className="text-green-700 uppercase">Edit</button>
-              </div>
-            </div>
-          </>
-        ))} */}
+      <PopUp isOpen={isOpen} message={message} onNo={onNo} onYes={onYes} />
     </div>
   )
 }

@@ -1,5 +1,3 @@
-import Popup from 'reactjs-popup'
-
 const PopUp = ({ isOpen, message, onYes, onNo }) => {
   if (!isOpen) return null
   const handleOverlayClick = (e) => {
