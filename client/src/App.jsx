@@ -11,6 +11,8 @@ import CreateListing from './pages/CreateListing.page'
 import Header from './components/Header.component'
 import PrivateRoute from './components/PrivateRoute'
 import UpdateListing from './pages/UpdateListing.page'
+import Listing from './pages/Listing.page'
+
 
 function App() {
   return (
@@ -40,6 +42,7 @@ function App() {
             element={<UpdateListing />}
           />
         </Route>
+        <Route path="/listing/:listingId" element={<Listing />} />
       </Routes>
     </BrowserRouter>
   )
