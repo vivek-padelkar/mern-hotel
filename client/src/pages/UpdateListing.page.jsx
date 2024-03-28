@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   getDownloadURL,
   getStorage,
@@ -11,7 +11,8 @@ import {
 import { app } from '../fireBase'
 import axiosInstance from '../utils/axiosConfig'
 
-const CreateListing = () => {
+const UpdateListing = () => {
+  const params = useParams()
   const [files, setFiles] = useState([])
   const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
@@ -31,6 +32,20 @@ const CreateListing = () => {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { currentUser } = useSelector((state) => state.user)
+
+  const listingId = params.listingId
+
+  useEffect(() => {
+    const fetchListingById = async () => {
+      try {
+        const { data } = await axiosInstance(`/listing/getlisting/${listingId}`)
+        setFormData(data)
+      } catch (error) {
+        toast.error(error.message || error)
+      }
+    }
+    fetchListingById()
+  }, [])
 
   function handleImageSubmit() {
     try {
@@ -123,12 +138,12 @@ const CreateListing = () => {
         },
       }
       const { data } = await axiosInstance.post(
-        `/listing/create`,
+        `/listing/update/${listingId}`,
         { ...formData, userRef: currentUser._id },
         AXIOS_HEADER
       )
 
-      toast.success('Your Listing posted successfully !')
+      toast.success('Your Listing Updated successfully !')
       setLoading(false)
       navigate(`/listing/${data.listing._id}`)
     } catch (error) {
@@ -139,7 +154,7 @@ const CreateListing = () => {
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
-        Create Listing
+        Update Listing
       </h1>
       <form
         onSubmit={handleSubmit}
@@ -443,7 +458,7 @@ const CreateListing = () => {
             disabled={loading}
             className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
           >
-            Create listing
+            Update listing
           </button>
         </div>
       </form>
@@ -451,4 +466,4 @@ const CreateListing = () => {
   )
 }
 
-export default CreateListing
+export default UpdateListing
