@@ -41,3 +41,9 @@ export const getUserListings = asyncHandler(async (req, res) => {
   const listings = await Listing.find({ userRef: req.params.id })
   return res.json(listings)
 })
+
+export const getUserDetailsById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).select('-password')
+  if (!user) throw Error('User Not found !')
+  return res.json(user)
+})
