@@ -75,6 +75,6 @@ export const getListings = asyncHandler(async (req, res) => {
     .sort({ [sort]: order })
     .limit(limit)
     .skip(startIndex)
-  // console.log(listings)
+
   res.json(listings)
 })

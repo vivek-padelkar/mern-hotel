@@ -12,7 +12,7 @@ import Header from './components/Header.component'
 import PrivateRoute from './components/PrivateRoute'
 import UpdateListing from './pages/UpdateListing.page'
 import Listing from './pages/Listing.page'
-
+import Search from './pages/Search.page'
 
 function App() {
   return (
@@ -43,6 +43,7 @@ function App() {
           />
         </Route>
         <Route path="/listing/:listingId" element={<Listing />} />
+        {/* <Route path="/search/:search" element={<Search />} /> */}
       </Routes>
     </BrowserRouter>
   )

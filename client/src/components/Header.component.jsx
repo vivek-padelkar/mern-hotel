@@ -1,8 +1,29 @@
 import { FaSearch } from 'react-icons/fa'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import axiosInstance from '../utils/axiosConfig.js'
 const Header = () => {
+  const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState('')
   const { currentUser } = useSelector((state) => state.user)
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const urlParams = new URLSearchParams(window.location.search)
+    urlParams.set('searchTerm', searchTerm)
+    const searcgQuery = urlParams.toString()
+    navigate(`/search?${searcgQuery}`)
+  }
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const searchTermFromUrl = urlParams.get('searchTerm', searchTerm)
+    if (searchTermFromUrl) {
+      setSearchTerm(searchTermFromUrl)
+    }
+  }, [location.search])
+
   return (
     <header className="bg-slate-200 shadow-md">
       <div className="flex justify-between items-center max-w-6xl mx-auto p-3">
@@ -15,13 +36,20 @@ const Header = () => {
         </Link>
 
         {/* search */}
-        <form className="bg-slate-100 p-3 rounded-full flex items-center gap-2 justify-between">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-slate-100 p-3 rounded-full flex items-center gap-2 justify-between"
+        >
           <input
             type="text"
-            placeholder="Search...(eg: 1BHK aprtment)"
+            placeholder="Search..."
+            value={searchTerm}
             className="bg-transparent w-24 sm:w-64 focus:outline-none"
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="text-slate-500" />
+          <button>
+            <FaSearch className="text-slate-500" />
+          </button>
         </form>
 
         {/* MENU */}
