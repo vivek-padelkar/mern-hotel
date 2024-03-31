@@ -38,6 +38,7 @@ export const getListing = asyncHandler(async (req, res) => {
 })
 
 export const getListings = asyncHandler(async (req, res) => {
+
   const limit = Number(req.query.limit) || 9
   const startIndex = Number(req.query.startIndex) || 0
   // for offer

@@ -43,7 +43,7 @@ function App() {
           />
         </Route>
         <Route path="/listing/:listingId" element={<Listing />} />
-        {/* <Route path="/search/:search" element={<Search />} /> */}
+        <Route path="/search" element={<Search />} />
       </Routes>
     </BrowserRouter>
   )
