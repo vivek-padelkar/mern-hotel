@@ -1,12 +1,12 @@
 import dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
 import cookieParser from 'cookie-parser'
 import { connectDb } from './db/dbConfig.js'
 import userRoute from './routes/user.routes.js'
 import authRoute from './routes/auth.routes.js'
 import listingRoute from './routes/listing.routes.js'
-
 import {
   errorHandler,
   routeNotFound,
@@ -25,6 +25,7 @@ app.use(
     credentials: true,
   })
 )
+const __dirname = path.resolve()
 
 app.use(express.json())
 app.use(cookieParser())
@@ -33,6 +34,11 @@ app.use(`${BASE_PATH}/auth`, authRoute)
 app.use(`${BASE_PATH}/user`, userRoute)
 app.use(`${BASE_PATH}/listing`, listingRoute)
 
+app.use(express.static(path.join(__dirname, '/client/dist')))
+
+app.get('*', (req, res) =>
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
+)
 app.use(routeNotFound)
 app.use(errorHandler)
 
