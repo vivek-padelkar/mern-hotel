@@ -14,20 +14,4 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-// // Response interceptor for decrypting incoming data
-// axiosInstance.interceptors.response.use(
-//   function (response) {
-//     // Decrypt response data
-//     if (response.data) {
-//       if (response.data.authorization)
-//         localStorage.setItem('token', response.data.authorization)
-//       response.data = JSON.parse(decrypt(response.data.data))
-//     }
-
-//     return response
-//   },
-//   function (error) {
-//     return Promise.reject(error)
-//   }
-// )
 export default axiosInstance

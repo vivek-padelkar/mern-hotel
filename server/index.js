@@ -21,7 +21,7 @@ connectDb()
 
 app.use(
   cors({
-    origin: 'http://localhost:5173', // Update with your client's origin
+    origin: 'https://eastside-estate.onrender.com/', // Update with your client's origin
     credentials: true,
   })
 )
