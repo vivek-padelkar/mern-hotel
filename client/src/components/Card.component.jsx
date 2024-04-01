@@ -2,12 +2,11 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 const Card = ({ key, listing }) => {
-  //   console.log('hwllo' + JSON.stringify(listing.imageUrls[0]))
   return (
     <div
       key={key}
       className="mb-4 bg-white shadow-md hover:shadow-lg 
-      transition-all duration-300 overflow-hidden rounded-lg w-full sm:w-[270px]"
+      transition-all duration-300 overflow-hidden rounded-lg w-full sm:w-[260px]"
     >
       <Link to={`/listing/${listing._id}`}>
         <img

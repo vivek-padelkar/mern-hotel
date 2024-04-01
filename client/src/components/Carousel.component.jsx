@@ -13,6 +13,7 @@ const Carousel = ({ arrImages }) => {
       <Swiper navigation>
         {arrImages.map((imageUrls) => (
           <SwiperSlide key={imageUrls}>
+            {console.log('hi' + imageUrls)}
             <div
               className="h-[500px]"
               style={{

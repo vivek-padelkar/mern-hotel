@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../utils/axiosConfig'
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
+import DataNotFound from '../../public/images/noData.png'
 import Card from '../components/Card.component'
 
 const Search = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [listing, setListing] = useState([])
+  const [showmore, setShowMore] = useState(false)
   const [sidebarData, setSidebarData] = useState({
     searchTerm: '',
     type: 'all',
@@ -24,8 +26,6 @@ const Search = () => {
     const searchTermFromUrl = urlParams.get('searchTerm')
     const typeFromUrl = urlParams.get('type')
     const parkingFromUrl = urlParams.get('parking')
-    console.log(parkingFromUrl)
-    console.log(parkingFromUrl || false)
     const furnishedFromUrl = urlParams.get('furnished')
     const offerFromUrl = urlParams.get('offer')
     const sortFromUrl = urlParams.get('sort')
@@ -54,13 +54,18 @@ const Search = () => {
     const fetchListing = async () => {
       try {
         setLoading(true)
+        setShowMore(false)
         const searchQuery = urlParams.toString()
         const { data } = await axiosInstance.get(`/listing/get?${searchQuery}`)
+        if (data.length > 8) {
+          setShowMore(true)
+        }
         setListing(data)
         setLoading(false)
       } catch (error) {
         toast.error(error.message || error)
         setLoading(false)
+        setShowMore(false)
       }
     }
 
@@ -97,7 +102,20 @@ const Search = () => {
     }
   }
 
-  console.log(listing)
+  const onShowMoreClick = async () => {
+    toast.success('called')
+    const numberOfListing = listing.length
+    const startIndex = numberOfListing
+    const urlParams = new URLSearchParams(location.search)
+    urlParams.set('startIndex', startIndex)
+    const searchQuery = urlParams.toString()
+    const data = await axiosInstance.get(`/listing/get?${searchQuery}`)
+    console.log(data)
+    if (data.length < 8) {
+      setShowMore(false)
+    }
+    setListing([...listing, ...data])
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -114,7 +132,7 @@ const Search = () => {
   }
   return (
     <div className="flex flex-col md:flex-row">
-      <div className="p-7 border-b-2 md:border-r-2 md:min-h-screen">
+      <div className="p-7 border-b-2 md:border-r-2">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           {/* searchterm */}
           <div>
@@ -223,16 +241,32 @@ const Search = () => {
           </button>
         </form>
       </div>
-      <div className="">
+      <div className="flex-1">
         <h1 className="text-3xl font-semibold border-b p-3 mt-5 text-slate-700">
           Listing Result:{' '}
         </h1>
-        <div className="flex gap-3 p-5">
-          {!loading && listing.length === 0 && <p>oops Data not found</p>}
+        {!loading && listing.length === 0 && (
+          <div>
+            <p className="text-center text-3xl mt-10 font-semibold">
+              OOPS, Data not found !
+            </p>
+            <img className="mx-auto" src={DataNotFound} alt="" />
+          </div>
+        )}
+        <div className="flex gap-4 p-3 flex-wrap">
           {loading && <p>loading</p>}
           {!loading &&
             listing.map((list) => <Card key={list._id} listing={list} />)}
         </div>
+
+        {showmore && (
+          <button
+            className="block mx-auto mt-4 text-green-700 hover:underline"
+            onClick={onShowMoreClick}
+          >
+            Show more
+          </button>
+        )}
       </div>
     </div>
   )
