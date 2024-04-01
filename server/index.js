@@ -14,7 +14,7 @@ import {
 
 dotenv.config()
 const app = express()
-const PORT = process.env.PORT || 5003
+const PORT = 3000
 const BASE_PATH = process.env.BASE_PATH
 
 connectDb()
