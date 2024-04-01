@@ -1,4 +1,4 @@
-import Joi from '@hapi/Joi'
+import Joi from 'joi'
 import { validateSchema } from './validation.js'
 
 export function signUpValidator(reqbody) {
