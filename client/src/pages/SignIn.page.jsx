@@ -77,7 +77,7 @@ const SignIn = () => {
         >
           {loading ? `Loading...` : `Sign in`}
         </button>
-        <Oauth />
+        {/* <Oauth /> */}
       </form>
 
       <div className="my-2">
