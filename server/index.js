@@ -43,5 +43,6 @@ app.use(routeNotFound)
 app.use(errorHandler)
 
 app.listen(PORT, () => {
+  console.log('testing comment added')
   console.log('Server is runnin on port: ' + PORT)
 })
